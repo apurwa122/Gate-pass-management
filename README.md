@@ -106,6 +106,24 @@ npm run dev --prefix frontend
 
 Open the Vite URL printed in the frontend terminal (normally `http://localhost:5173`). The API health check is `http://localhost:5000/api/health`. On first backend start, the schema and demo accounts/sample records are initialized automatically. To use a different database location, set `DATABASE_PATH` in `backend/.env`.
 
+## Deploy to Render
+
+This repository can be deployed as a Render web service for the API and a Render static site for the React app. Because the API uses SQLite, mount a persistent disk on the API service and set `DATABASE_PATH` to a file on that disk. Render's free web services have ephemeral filesystems, so their SQLite database is lost on restarts or redeploys. Persistent disks require a paid web service.
+
+1. In Render, create a **Web Service** from this GitHub repository. Set the root directory to `backend`, the build command to `npm install`, and the start command to `npm start`.
+2. Choose a paid web-service plan, then add a persistent disk mounted at `/var/data`. Set these environment variables in Render:
+   - `NODE_ENV=production`
+   - `DATABASE_PATH=/var/data/gatepass.sqlite`
+   - `JWT_SECRET` to a long, random secret
+   - `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` to the initial administrator's details; use a password with at least 12 characters
+   - `CLIENT_URL` to the frontend's Render URL (add it after creating the static site)
+3. Create a **Static Site** from the same repository. Set root directory to `frontend`, build command to `npm install && npm run build`, and publish directory to `dist`. Set `VITE_API_URL` to the backend URL followed by `/api`, such as `https://your-api.onrender.com/api`.
+4. In the static site's **Redirects/Rewrites** settings, add a rewrite from `/*` to `/index.html`. This lets React Router handle page URLs.
+5. Copy the static site's URL into the backend's `CLIENT_URL` setting and redeploy the API.
+6. Open the frontend URL, sign in with the initial admin credentials, and create requester, approver, and security accounts in User management.
+
+In production, the API does not create the shared demo accounts. It creates only the initial admin from the private environment variables, and only when the database does not already contain an admin. Keep real visitor information out of a public portfolio demo. Render currently offers free static sites, but persistent disks are available only to paid services; see [Render's free instance limits](https://render.com/docs/free) and [persistent disk documentation](https://render.com/docs/disks) for current details.
+
 ## Demo credentials
 
 All demo users use password `GatePass123!`:

@@ -10,6 +10,33 @@ const demoUsers = [
 ];
 
 export function seedDatabase() {
+  const productionMode = process.env.NODE_ENV === 'production' || process.env.DEMO_MODE === 'false';
+
+  if (productionMode) {
+    const existingAdmin = db.prepare("SELECT id FROM users WHERE role='admin' LIMIT 1").get();
+
+    if (!existingAdmin) {
+      const name = process.env.ADMIN_NAME?.trim() || 'GatePass Admin';
+      const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+      const password = process.env.ADMIN_PASSWORD;
+
+      if (!email || !password || password.length < 12) {
+        throw new Error(
+          'Set ADMIN_EMAIL and an ADMIN_PASSWORD of at least 12 characters before starting production.',
+        );
+      }
+
+      db.prepare('INSERT INTO users(name,email,password_hash,role) VALUES(?,?,?,?)').run(
+        name,
+        email,
+        bcrypt.hashSync(password, 12),
+        'admin',
+      );
+    }
+
+    return;
+  }
+
   const addUser = db.prepare(
     'INSERT OR IGNORE INTO users(name,email,password_hash,role) VALUES(?,?,?,?)',
   );
