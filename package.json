@@ -1,0 +1,15 @@
+{
+  "name": "gatepass-management-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "start": "npm run start --prefix backend",
+    "format": "prettier --write \"frontend/src/**/*.{js,jsx,css}\" \"frontend/*.js\" \"backend/src/**/*.js\" \"*.json\" \"frontend/*.json\" \"backend/*.json\" README.md",
+    "format:check": "prettier --check \"frontend/src/**/*.{js,jsx,css}\" \"frontend/*.js\" \"backend/src/**/*.js\" \"*.json\" \"frontend/*.json\" \"backend/*.json\" README.md"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.9.9"
+  }
+}
