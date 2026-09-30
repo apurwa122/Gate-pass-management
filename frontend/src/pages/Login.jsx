@@ -6,6 +6,7 @@ import { homeFor } from '../utils/roles';
 import { Field, Notice } from '../components/ui';
 
 export function Login() {
+  const pagesPreview = import.meta.env.VITE_PAGES_PREVIEW === 'true';
   const { login } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState('requester@gatepass.local');
@@ -42,7 +43,14 @@ export function Login() {
         </div>
         <h1>Welcome back</h1>
         <p className="muted">Sign in to your GatePass workspace.</p>
-        {error && <Notice type="error">{error}</Notice>}
+        {pagesPreview ? (
+          <Notice>
+            This GitHub Pages preview hosts the frontend only. Sign-in and visitor workflows need
+            the Express API, which GitHub Pages cannot run.
+          </Notice>
+        ) : (
+          error && <Notice type="error">{error}</Notice>
+        )}
         <form onSubmit={submit} className="form-stack">
           <Field label="Work email">
             <input
@@ -62,35 +70,38 @@ export function Login() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field>
-          <button className="btn btn-primary btn-full" disabled={busy}>
-            {busy ? 'Signing in…' : 'Sign in'} <ArrowRight size={16} />
+          <button className="btn btn-primary btn-full" disabled={busy || pagesPreview}>
+            {pagesPreview ? 'API not connected' : busy ? 'Signing in...' : 'Sign in'}{' '}
+            <ArrowRight size={16} />
           </button>
         </form>
-        <div className="demo-box">
-          <b>Demo access</b>
-          <p>
-            Select a role to try the workflow. Password: <code>GatePass123!</code>
-          </p>
-          <div className="demo-roles">
-            {[
-              ['requester', 'Requester'],
-              ['approver', 'Approver'],
-              ['security', 'Security'],
-              ['admin', 'Admin'],
-            ].map(([emailpart, label]) => (
-              <button
-                type="button"
-                key={emailpart}
-                onClick={() => {
-                  setEmail(`${emailpart}@gatepass.local`);
-                  setPassword('GatePass123!');
-                }}
-              >
-                {label}
-              </button>
-            ))}
+        {!pagesPreview && (
+          <div className="demo-box">
+            <b>Demo access</b>
+            <p>
+              Select a role to try the workflow. Password: <code>GatePass123!</code>
+            </p>
+            <div className="demo-roles">
+              {[
+                ['requester', 'Requester'],
+                ['approver', 'Approver'],
+                ['security', 'Security'],
+                ['admin', 'Admin'],
+              ].map(([emailpart, label]) => (
+                <button
+                  type="button"
+                  key={emailpart}
+                  onClick={() => {
+                    setEmail(`${emailpart}@gatepass.local`);
+                    setPassword('GatePass123!');
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </section>
       <span className="login-legal">A simple, secure way to manage every visit.</span>
     </div>
